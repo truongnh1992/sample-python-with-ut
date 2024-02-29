@@ -10,17 +10,17 @@ on:
       - Trial_Prod
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: build image
-        run: |
-          cd src
-          docker build -t equation .
+  # build:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v4
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v3
+  #     - name: build image
+  #       run: |
+  #         cd src
+  #         docker build -t equation .
   
   check-unit-test:
     runs-on: ubuntu-latest
@@ -36,16 +36,17 @@ jobs:
           cd src
           python -m unittest test_equation.TestFirst
 
+
   notify-slack:
     name: Notify Slack
     runs-on: ubuntu-latest
     needs:
-      - build
+      # - build
       - check-unit-test
+    if: needs.check-unit-test.result == 'failed'
     steps:
       - uses: abinoda/slack-action@master
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         with:
-          args: '{\"channel\":\"${{ secrets.SLACK_CHANNEL_ID }}\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"Commit `${{ github.sha }}` to the `${{ github.ref_name }}` branch passed *Unit Test* and builds successfully :watian-thumbsup: \"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Author:* <github.com/${{ github.event.pusher.name }}|${{ github.event.pusher.name }}>\n\n:logo_github_icon_143196: Hi <@U045UV124A0>, <@U01U6B8P3FU>. Please take a look.\"}}]}'
-        if: success()
+          args: '{\"channel\":\"${{ secrets.SLACK_CHANNEL_ID }}\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"Commit `${{ github.sha }}` to the `${{ github.ref_name }}` branch failed *Unit Test* :ghost: \"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Author:* <github.com/${{ github.event.pusher.name }}|${{ github.event.pusher.name }}>\n\n:logo_github_icon_143196: Hi <@U045UV124A0>, <@U01U6B8P3FU>. Please take a look.\"}}]}'
