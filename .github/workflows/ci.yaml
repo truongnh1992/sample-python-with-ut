@@ -47,5 +47,5 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         with:
-          args: '{\"channel\":\"${{ secrets.SLACK_CHANNEL_ID }}\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"The following commit passed `Unit Test` and can build image :watian-thumbsup: \"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Contributor :* <https://github.com/${{ github.event.pull_request.user.login }}|${{ github.event.pull_request.user.login }}>\n\n:logo_github_icon_143196: Hi <@U045UV124A0>, <@U01U6B8P3FU>. Please take a look.\"}}]}'
+          args: '{\"channel\":\"${{ secrets.SLACK_CHANNEL_ID }}\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"This commit ${{ git rev-parse --short HEAD }} to the branch ${{ github.head_ref }} passed `Unit Test` and can build image :watian-thumbsup: \"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Author :* <https://github.com/${{ github.event.pusher.name }}|${{ github.event.pusher.name }}>\n\n:logo_github_icon_143196: Hi <@U045UV124A0>, <@U01U6B8P3FU>. Please take a look.\"}}]}'
         if: success()
