@@ -43,9 +43,15 @@ jobs:
       - build
       - check-unit-test
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: get short sha
+        id: get-short-sha
+        run: |
+          GIT_SHORT_SHA=$(git rev-parse --short HEAD)
       - uses: abinoda/slack-action@master
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         with:
-          args: '{\"channel\":\"${{ secrets.SLACK_CHANNEL_ID }}\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"Commit `${{ github.sha }}` to the `${{ github.ref_name }}` branch passed *Unit Test* and builds successfully :watian-thumbsup: \"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Author:* <github.com/${{ github.event.pusher.name }}|${{ github.event.pusher.name }}>\n\n:logo_github_icon_143196: Hi <@U045UV124A0>, <@U01U6B8P3FU>. Please take a look.\"}}]}'
+          args: '{\"channel\":\"${{ secrets.SLACK_CHANNEL_ID }}\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"Commit `$GIT_SHORT_SHA` to the `${{ github.ref_name }}` branch passed *Unit Test* and builds successfully :watian-thumbsup: \"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Author:* <github.com/${{ github.event.pusher.name }}|${{ github.event.pusher.name }}>\n\n:logo_github_icon_143196: Hi <@U045UV124A0>, <@U01U6B8P3FU>. Please take a look.\"}}]}'
         if: success()
