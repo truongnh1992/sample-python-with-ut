@@ -2,4 +2,4 @@
 Implement Github Action to verify unit test success on commits.
 
 
-`mt-main` branch
+`hotfix/WATI-1234` branch
