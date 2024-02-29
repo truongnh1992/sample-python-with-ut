@@ -2,4 +2,4 @@
 Implement Github Action to verify unit test success on commits.
 
 
-`mt-main` branch
+This is `release/mt-main-sprint-0` branch
