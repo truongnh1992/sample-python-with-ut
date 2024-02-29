@@ -40,10 +40,13 @@ jobs:
   notify-slack:
     name: Notify Slack
     runs-on: ubuntu-latest
-    if: check-unit-test.result == 'failed'
+    needs:
+      # - build
+      - check-unit-test
+    if: ${{ always() && contains(needs.*.result, 'failure') }}
     steps:
       - uses: abinoda/slack-action@master
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         with:
-          args: '{\"channel\":\"${{ secrets.SLACK_CHANNEL_ID }}\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"Commit `${{ github.sha }}` to the `${{ github.ref_name }}` branch failed *Unit Test* :ghost: \"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Author:* <github.com/${{ github.event.pusher.name }}|${{ github.event.pusher.name }}>\n\n:logo_github_icon_143196: Hi <@U045UV124A0>, <@U01U6B8P3FU>. Please take a look.\"}}]}'
+          args: '{\"channel\":\"${{ secrets.SLACK_CHANNEL_ID }}\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"Commit `${{ github.sha }}` to the `${{ github.ref_name }}` branch failed *Unit Test* :x: \"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Author:* <github.com/${{ github.event.pusher.name }}|${{ github.event.pusher.name }}>\n\n:logo_github_icon_143196: Hi <@U045UV124A0>, <@U01U6B8P3FU>. Please take a look.\"}}]}'
