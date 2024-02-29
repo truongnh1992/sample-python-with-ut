@@ -1,0 +1,51 @@
+name: Notify Slack when UT doesn't pass
+on:
+  push:
+    branches:
+      - 'release/*'
+      - 'feature/*'
+      - 'hotfix/*'
+      - production
+      - mt-main
+      - Trial_Prod
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: build image
+        run: |
+          cd src
+          docker build -t equation .
+  
+  check-unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Run unit test
+        run: |
+          cd src
+          python -m unittest test_equation.TestFirst
+
+  notify-slack:
+    name: Notify Slack
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - check-unit-test
+    steps:
+      - uses: abinoda/slack-action@master
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        with:
+          args: '{\"channel\":\"${{ secrets.SLACK_CHANNEL_ID }}\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"The following commit passed `Unit Test` and can build image :watian-thumbsup: \"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Contributor :* <https://github.com/${{ github.event.pull_request.user.login }}|${{ github.event.pull_request.user.login }}>\n\n:logo_github_icon_143196: Hi <@U045UV124A0>, <@U01U6B8P3FU>. Please take a look.\"}}]}'
+        if: success()
