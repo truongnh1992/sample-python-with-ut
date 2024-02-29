@@ -6,9 +6,5 @@ def find_x(a,b):
     else:
         return "ALL"
 
-def find_x_2(a,b):
-    return -b/a
-
-
 if __name__ == "__main__":
     print(find_x(10,10))
