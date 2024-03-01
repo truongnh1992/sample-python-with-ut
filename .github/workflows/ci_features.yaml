@@ -53,7 +53,7 @@ jobs:
 
       # Notify Slack about the outcome
       - name: Notify Slack
-        uses: some-slack-action/slack@v1
+        uses: abinoda/slack-action@master
         if: ${{ always() }}
         with:
           status: ${{ job.status }}
