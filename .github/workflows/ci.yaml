@@ -37,7 +37,6 @@ jobs:
           cd src
           python -m unittest test_equation.TestFirst
 
-
   notify-slack:
     name: Notify Slack
     runs-on: ubuntu-latest
