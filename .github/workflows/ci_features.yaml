@@ -1,4 +1,4 @@
-name: Notify Slack when UT doesn't pass
+name: Notify Slack when UT and build image
 on:
   workflow_dispatch:
 #   push:
