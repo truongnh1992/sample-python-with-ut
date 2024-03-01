@@ -1,16 +1,20 @@
 name: Notify Slack when UT doesn't pass
 on:
-  push:
-    branches:
-      - 'release/*'
-      - 'feature/*'
-      - 'hotfix/*'
-  pull_request:
-    types: [closed]
-    branches:
-      - 'release/*'
-      - 'feature/*'
-      - 'hotfix/*'
+  workflow_dispatch:
+#   push:
+#     branches:
+#       - 'release/*'
+#       - 'feature/*'
+#       - 'hotfix/*'
+#   pull_request:
+#     types: [closed]
+#     branches:
+#       - 'release/*'
+#       - 'feature/*'
+#       - 'hotfix/*'
+
+
+
 jobs:
   # build:
   #   runs-on: ubuntu-latest
@@ -37,6 +41,8 @@ jobs:
         run: |
           cd src
           python -m unittest test_equation.TestFirst
+      - name: Build Docker image
+        run: docker build -t my-nginx-image -f Dockerfile.nginx .
 
       # Notify Slack on failure
       - name: Notify Slack on Failure
