@@ -1,15 +1,15 @@
 name: Notify Slack when UT doesn't pass
 on:
-  pull_request:
-    branches:
-      - 'release/*'
-      - 'feature/*'
-      - 'hotfix/*'
-      - production
-      - mt-main
-      - Trial_Prod
-      - master
-      - main
+  # pull_request:
+  #   branches:
+  #     - 'release/*'
+  #     - 'feature/*'
+  #     - 'hotfix/*'
+  #     - production
+  #     - mt-main
+  #     - Trial_Prod
+  #     - master
+  #     - main
 jobs:
   # build:
   #   runs-on: ubuntu-latest
