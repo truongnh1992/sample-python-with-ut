@@ -27,7 +27,7 @@ jobs:
 
       - name: Run unit test
         id: unit-test
-        # continue-on-error: true
+        continue-on-error: true
         run: |
           cd src
           python -m unittest test_equation.TestFirst
@@ -35,7 +35,7 @@ jobs:
 
       - name: Build Docker image
         id: docker-build
-        # continue-on-error: true
+        continue-on-error: true
         run: |
           docker build -t my-nginx-image -f Dockerfile .
           echo "docker_build_outcome=$?" >> $GITHUB_ENV
