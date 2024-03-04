@@ -27,7 +27,7 @@ jobs:
 
       - name: Run unit test
         id: unit-test
-        continue-on-error: true
+        # continue-on-error: true
         run: |
           cd src
           python -m unittest test_equation.TestFirst
@@ -35,13 +35,13 @@ jobs:
 
       - name: Build Docker image
         id: docker-build
-        continue-on-error: true
+        # continue-on-error: true
         run: |
           docker build -t my-nginx-image -f Dockerfile .
           echo "docker_build_outcome=$?" >> $GITHUB_ENV
 
       - name: Notify Slack - Failure
-        if: ${{ env.unit_test_outcome != '0' || env.docker_build_outcome != '0' }}
+        if: ${{ steps.docker-build.outcome == 'failure' || steps.unit-test.outcome == 'failure' }}
         uses: abinoda/slack-action@master
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -49,7 +49,7 @@ jobs:
           args: '{"channel":"${{ secrets.SLACK_CHANNEL_ID }}","blocks":[{"type":"section","text":{"type":"mrkdwn","text":"The following PR to `${{ github.event.pull_request.base.ref }}` branch failed *Unit Test* :pepe_alert: "}}, {"type":"section","text":{"type":"mrkdwn","text":"*Pull Request:* <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>"}}, {"type":"section","text":{"type":"mrkdwn","text":"*Contributor :* <https://github.com/${{ github.event.pull_request.user.login }}|${{ github.event.pull_request.user.login }}>\\n\\n:logo_github_icon_143196: Hi <@U045UV124A0>, <@U01U6B8P3FU>. Please take a look."}}]}'
 
       - name: Notify Slack - Success
-        if: ${{ env.unit_test_outcome == '0' && env.docker_build_outcome == '0' }}
+        if: ${{ steps.docker-build.outcome == 'success' && steps.unit-test.outcome == 'success' }}
         uses: abinoda/slack-action@master
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
