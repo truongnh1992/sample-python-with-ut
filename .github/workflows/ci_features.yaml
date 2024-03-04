@@ -37,7 +37,11 @@ jobs:
         run: |
           docker build -t my-nginx-image -f Dockerfile .
           echo "docker_build_outcome=$?" >> $GITHUB_ENV
-
+      - name: Map GitHub to Slack ID
+        id: map-github-slack
+        run: |
+          SLACK_ID=$(jq -r '.["${{ github.event.pull_request.user.login }}"]' .github/github_to_slack_mapping.json)
+          echo "SLACK_ID=$SLACK_ID" >> $GITHUB_ENV
       - name: Notify Slack - Failure
         if: ${{ steps.docker-build.outcome == 'failure' || steps.unit-test.outcome == 'failure' }}
         uses: abinoda/slack-action@master
