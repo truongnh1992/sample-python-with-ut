@@ -2,8 +2,7 @@ name: My Tag Triggered Workflow
 on:
   push:
     tags:
-      - 'mt-main-*' # Trigger on tags starting with 'v' (you can adjust the pattern)
-
+      - 'mt-main-*'
 jobs:
   build:
     runs-on: ubuntu-latest
