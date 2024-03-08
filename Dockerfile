@@ -9,7 +9,7 @@ RUN rm -f index.html
 
 # Copy the static content of your website into the Nginx container.
 # Assume that you have a directory 'static-website' containing your HTML, CSS, JavaScript, etc.
-COPY static-website/ .
+COPY . .
 
 # Expose port 80 to the host so this container can serve traffic.
 EXPOSE 80

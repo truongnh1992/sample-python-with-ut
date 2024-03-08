@@ -1,0 +1,37 @@
+name: Ci from tags
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Backend tag'
+        default: master
+        required: true
+        type: string
+
+jobs:
+  check-unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Run unit test
+        id: unit-test
+        continue-on-error: true
+        run: |
+          cd src
+          python -m unittest test_equation.TestFirst
+          echo "unit_test_outcome=$?" >> $GITHUB_ENV
+
+      - name: Build Docker image
+        id: docker-build
+        continue-on-error: true
+        run: |
+          docker build -t my-nginx-image -f Dockerfile .
+          echo "docker_build_outcome=$?" >> $GITHUB_ENV
+        
