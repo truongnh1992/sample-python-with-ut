@@ -23,17 +23,21 @@ jobs:
         with:
           distribution: 'temurin' # See 'Supported distributions' for available options
           java-version: '17'
+      - uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarqube.clare.ai/
       # Setup sonar-scanner
-      - name: Setup SonarQube
-        uses: warchant/setup-sonar-scanner@v7
-      # Run sonar-scanner
-      - name: SonarQube Scan
-        run: sonar-scanner
-            -Dsonar.host.url=https://sonarqube.clare.ai/
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-            -Dsonar.organization=ClareAI
-            -Dsonar.projectKey=mt-dev-sonar
-            -Dsonar.sources=$GITHUB_WORKSPACE
+      # - name: Setup SonarQube
+      #   uses: warchant/setup-sonar-scanner@v7
+      # # Run sonar-scanner
+      # - name: SonarQube Scan
+      #   run: sonar-scanner
+      #       -Dsonar.host.url=https://sonarqube.clare.ai/
+      #       -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+      #       -Dsonar.organization=ClareAI
+      #       -Dsonar.projectKey=mt-dev-sonar
+      #       -Dsonar.sources=$GITHUB_WORKSPACE
       - name: Run unit test
         id: unit-test
         continue-on-error: true
