@@ -1,52 +1,54 @@
 name: Notify Slack when UT doesn't pass
 on:
-  # pull_request:
-  #   branches:
-  #     - 'release/*'
-  #     - 'feature/*'
-  #     - 'hotfix/*'
-  #     - production
-  #     - mt-main
-  #     - Trial_Prod
-  #     - master
-  #     - main
+  pull_request:
+    branches:
+      - 'release/*'
+      - 'feature/*'
+      - 'hotfix/*'
+      - production
+      - mt-main
+      - Trial_Prod
+      - master
+      - main
 jobs:
-  # build:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout repo
-  #       uses: actions/checkout@v4
-  #     - name: Set up Docker Buildx
-  #       uses: docker/setup-buildx-action@v3
-  #     - name: build image
-  #       run: |
-  #         cd src
-  #         docker build -t equation .
-  
-  check-unit-test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
       - name: Run unit test
+        id: unit-test
         run: |
           cd src
           python -m unittest test_equation.TestFirst
+      - name: Build docker image
+        id: docker-build
+        run: |
+          cd src
+          docker build -t equation .
 
-  notify-slack:
-    name: Notify Slack
-    runs-on: ubuntu-latest
-    needs:
-      # - build
-      - check-unit-test
-    if: ${{ always() && contains(needs.*.result, 'failure') }}
-    steps:
-      - uses: abinoda/slack-action@master
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      - name: Notify Slack - Failure
+        id: slack-failure
+        uses: slackapi/slack-github-action@v1.24.0
+        if: ${{ steps.docker-build.outcome == 'failure' || steps.unit-test.outcome == 'failure'}}
         with:
-          args: '{\"channel\":\"${{ secrets.SLACK_CHANNEL_ID }}\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"The following PR to `${{ github.event.pull_request.base.ref }}` branch failed *Unit Test* :pepe_alert: \"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Pull Request:* <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>\"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Contributor :* <https://github.com/${{ github.event.pull_request.user.login }}|${{ github.event.pull_request.user.login }}>\n\n:logo_github_icon_143196: Hi <@U045UV124A0>, <@U01U6B8P3FU>. Please take a look.\"}}]}'
+          channel-id: 'C03LYDHJ4J2' 
+          slack-message: "*The following PR to `${{ github.event.pull_request.base.ref }}` branch failed Build :pepe_alert:*\n*Repository:* pricing_service\n*Pull Request:* <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>\n*Contributor :* <@${{ steps.map-github-slack.outputs.SLACK_ID }}>\n\n:logo_github_icon_143196: Hi <@U045UV124A0>, <@U01U6B8P3FU>, <@U06CKNZC9FH>, <@U034CLEKGDN>, <@U05G9K7TUQP>, <!subteam^S06GHNC61B6>. Please take a look."
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN_PR_NOTI }}
+      - name: Notify Slack - Success (Reply)
+        id: slack-success
+        uses: slackapi/slack-github-action@v1.24.0
+        if: ${{ steps.docker-build.outcome == 'success' && steps.unit-test.outcome == 'success' && steps.slack-failure.outputs.ts != ''}}
+        with:
+          thread_ts: ${{ steps.slack-failure.outputs.ts }} # Reply to the failure message
+          channel-id: 'C03LYDHJ4J2' 
+          slack-message: "*Build Succeeded! :white_check_mark:*\nThe issues have been resolved for PR `${{ github.event.pull_request.title }}`. Tests are passing."
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN_PR_NOTI }}
