@@ -34,6 +34,18 @@ jobs:
         run: |
           cd src
           docker build -t equation .
+      - name: Get Previous Build Status (if available)
+        id: get-previous-status
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { data: { statuses } } = await github.rest.repos.listCommitStatusesForRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha
+            });
+            const previousStatus = statuses.find(status => status.context === 'build_and_test'); // Assuming your job is named 'build_and_test'
+            core.setOutput('previous_status', previousStatus?.state || '');
 
       - name: Notify Slack - Failure
         id: slack-failure
@@ -47,7 +59,7 @@ jobs:
       - name: Notify Slack - Success (Reply)
         id: slack-success
         uses: slackapi/slack-github-action@v1.24.0
-        if: ${{ steps.docker-build.outcome == 'success' && steps.unit-test.outcome == 'success' }}
+        if: ${{ steps.docker-build.outcome == 'success' && steps.unit-test.outcome == 'success' && steps.get-previous-status.outputs.previous_status == 'failure' }}
         with:
           thread_ts: ${{ steps.slack-failure.outputs.ts }} # Reply to the failure message
           channel-id: 'C03LYDHJ4J2' 
