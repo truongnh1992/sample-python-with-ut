@@ -62,3 +62,12 @@ jobs:
           alias: github-action-failure
           message: "Build or test failed for repository ${{ github.repository }} on branch ${{ github.ref }}"
           source: "GitHub Actions"
+
+      - name: Close Alert
+        uses: rockem/close-opsgenie-alert-action@v1
+        if: ${{ steps.docker-build.outcome == 'success' || steps.unit-test.outcome == 'success'}}
+        with:
+          api_key: ${{ secrets.OPSGENIE_API_KEY }}
+          alias: github-action-failure
+          note: "✅ RESOLVE for repository ${{ github.repository }} on branch ${{ github.ref }}"
+          source: "GitHub Actions"
