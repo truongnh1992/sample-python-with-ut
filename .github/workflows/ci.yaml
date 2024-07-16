@@ -35,22 +35,30 @@ jobs:
           cd src
           docker build -t equation .
 
-      - name: Map GitHub to Slack ID
-        id: map-github-slack
-        run: |
-          curl -H "Authorization: token ${{ secrets.DEVOPS_GITHUB_ACCESS_TOKEN }}" \
-          -H "Accept: application/vnd.github.v3.raw" \
-          -L https://api.github.com/repos/truongnh1992/sample-python-with-ut/contents/.github/github_to_slack_mapping.json -o mapping.json
-          SLACK_ID=$(jq -r '.["${{ github.event.pull_request.user.login }}"]' mapping.json)
-          echo "SLACK_ID=$SLACK_ID" >> $GITHUB_ENV
-          echo "SLACK_ID=$SLACK_ID" >> $GITHUB_OUTPUT
+      # - name: Map GitHub to Slack ID
+      #   id: map-github-slack
+      #   run: |
+      #     curl -H "Authorization: token ${{ secrets.DEVOPS_GITHUB_ACCESS_TOKEN }}" \
+      #     -H "Accept: application/vnd.github.v3.raw" \
+      #     -L https://api.github.com/repos/truongnh1992/sample-python-with-ut/contents/.github/github_to_slack_mapping.json -o mapping.json
+      #     SLACK_ID=$(jq -r '.["${{ github.event.pull_request.user.login }}"]' mapping.json)
+      #     echo "SLACK_ID=$SLACK_ID" >> $GITHUB_ENV
+      #     echo "SLACK_ID=$SLACK_ID" >> $GITHUB_OUTPUT
 
-      - name: Notify Slack - Failure
-        id: slack-failure
-        uses: slackapi/slack-github-action@v1.24.0
+      # - name: Notify Slack - Failure
+      #   id: slack-failure
+      #   uses: slackapi/slack-github-action@v1.24.0
+      #   if: ${{ steps.docker-build.outcome == 'failure' || steps.unit-test.outcome == 'failure'}}
+      #   with:
+      #     channel-id: 'C03LYDHJ4J2' 
+      #     slack-message: "*The following PR to `${{ github.event.pull_request.base.ref }}` branch failed Build :pepe_alert:*\n*Repository:* alex_repo\n*Pull Request:* <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>\n*Contributor :* <@${{ steps.map-github-slack.outputs.SLACK_ID }}>\n\n:logo_github_icon_143196: Hi <@U045UV124A0>, <@U01U6B8P3FU>, <@U06CKNZC9FH>, <@U034CLEKGDN>, <@U05G9K7TUQP>, <!subteam^S06GHNC61B6>. Please take a look."
+      #   env:
+      #     SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      - name: Notify Slack - Failure with Opsgenie
+        uses: eonx-com/actions-opsgenie@v1
         if: ${{ steps.docker-build.outcome == 'failure' || steps.unit-test.outcome == 'failure'}}
         with:
-          channel-id: 'C03LYDHJ4J2' 
-          slack-message: "*The following PR to `${{ github.event.pull_request.base.ref }}` branch failed Build :pepe_alert:*\n*Repository:* alex_repo\n*Pull Request:* <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>\n*Contributor :* <@${{ steps.map-github-slack.outputs.SLACK_ID }}>\n\n:logo_github_icon_143196: Hi <@U045UV124A0>, <@U01U6B8P3FU>, <@U06CKNZC9FH>, <@U034CLEKGDN>, <@U05G9K7TUQP>, <!subteam^S06GHNC61B6>. Please take a look."
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          api_key: ${{ secrets.OPSGENIE_API_KEY }}
+          alias: github-action-failure 
+          message: "Build or test failed for repository ${{ github.repository }} on branch ${{ github.ref }}"
+          priority: P3
