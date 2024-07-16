@@ -35,6 +35,16 @@ jobs:
           cd src
           docker build -t equation .
 
+      - name: Map GitHub to Slack ID
+        id: map-github-slack
+        run: |
+          curl -H "Authorization: token ${{ secrets.DEVOPS_GITHUB_ACCESS_TOKEN }}" \
+          -H "Accept: application/vnd.github.v3.raw" \
+          -L https://api.github.com/repos/truongnh1992/sample-python-with-ut/contents/.github/github_to_slack_mapping.json -o mapping.json
+          SLACK_ID=$(jq -r '.["${{ github.event.pull_request.user.login }}"]' mapping.json)
+          echo "SLACK_ID=$SLACK_ID" >> $GITHUB_ENV
+          echo "SLACK_ID=$SLACK_ID" >> $GITHUB_OUTPUT
+
       - name: Notify Slack - Failure
         id: slack-failure
         uses: slackapi/slack-github-action@v1.24.0
