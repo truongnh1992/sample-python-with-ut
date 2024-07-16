@@ -68,6 +68,6 @@ jobs:
         if: ${{ steps.docker-build.outcome == 'success' || steps.unit-test.outcome == 'success'}}
         with:
           api_key: ${{ secrets.OPSGENIE_API_KEY }}
-          alias: github-action-failure
+          alias: github-action-success
           note: "✅ RESOLVE for repository ${{ github.repository }} on branch ${{ github.ref }}"
           source: "GitHub Actions"
